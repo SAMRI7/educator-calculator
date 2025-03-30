@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educator Pay Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .calculator {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 24px;
+            color: #333;
+        }
+        
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        .input-group:last-of-type {
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            background: #d0d0d0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-left {
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .btn-right {
+            border-radius: 0 4px 4px 0;
+        }
+        
+        input[type="number"] {
+            width: 60px;
+            text-align: center;
+            padding: 8px 0;
+            border: 1px solid #e0e0e0;
+            border-left: none;
+            border-right: none;
+            font-size: 16px;
+            -moz-appearance: textfield;
+        }
+        
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .helper-text {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
+        
+        .breakdown {
+            background: #f9f9f9;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .breakdown h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .breakdown-grid div:nth-child(even) {
+            text-align: right;
+        }
+        
+        .breakdown-total {
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+        
+        .summary {
+            background: #e6f7ff;
+            border-radius: 6px;
+            padding: 16px;
+        }
+        
+        .summary h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #0066cc;
+        }
+        
+        .summary-list {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .effective-rate {
+            font-weight: bold;
+            margin-top: 8px;
+            padding-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Educator Pay Calculator</h1>
+        
+        <div class="input-group">
+            <label for="classes">Number of Classes Taught This Pay Period</label>
+            <div class="input-container">
+                <button id="decrease-classes" class="btn btn-left">-</button>
+                <input type="number" id="classes" min="0" max="40" value="0">
+                <button id="increase-classes" class="btn btn-right">+</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="full-days">Number of Full Days Taught (Morning & Afternoon consecutive)</label>
+            <div class="input-container">
+                <button id="decrease-days" class="btn btn-left">-</button>
+                <input type="number" id="full-days" min="0" value="0">
+                <button id="increase-days" class="btn btn-right">+</button>
+            </div>
+            <p id="max-days" class="helper-text">Maximum allowed: 0</p>
+        </div>
+        
+        <div class="input-group">
+            <label for="blogs">Number of Blogs Written</label>
+            <div class="input-container">
+                <button id="decrease-blogs" class="btn btn-left">-</button>
+                <input type="number" id="blogs" min="0" value="0">
+                <button id="increase-blogs" class="btn btn-right">+</button>
+            </div>
+        </div>
+        
+        <div class="breakdown">
+            <h2>Pay Breakdown</h2>
+            <div class="breakdown-grid">
+                <div>Base Pay:</div>
+                <div id="base-pay">$0.00 × 0 = $0.00</div>
+                
+                <div>Volume Bonus:</div>
+                <div id="volume-bonus">$0.00 × 0 = $0.00</div>
+                
+                <div>Full Day Bonus:</div>
+                <div id="full-day-bonus">$25.00 × 0 = $0.00</div>
+                
+                <div>Blog Pay:</div>
+                <div id="blog-pay">$150.00 × 0 = $0.00</div>
+                
+                <div class="breakdown-total">Total Pay:</div>
+                <div id="total-pay" class="breakdown-total">$0.00</div>
+            </div>
+        </div>
+        
+        <div class="summary">
+            <h2>Pay Rate Summary</h2>
+            <div class="summary-list">
+                <p>Base Rate: $100.00 per class</p>
+                <p id="bonus-rate">Volume Bonus: $0.00 per class</p>
+                <p>Full Day Bonus: $25.00 per full day</p>
+                <p>Blog Pay: $150.00 per blog</p>
+                <p id="effective-rate" class="effective-rate">Effective Rate: $0.00 per class</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const BASE_PAY = 100;
+        const FULL_DAY_BONUS = 25;
+        const BLOG_PAY = 150;
+        
+        // DOM Elements
+        const classesInput = document.getElementById('classes');
+        const fullDaysInput = document.getElementById('full-days');
+        const blogsInput = document.getElementById('blogs');
+        const decreaseClasses = document.getElementById('decrease-classes');
+        const increaseClasses = document.getElementById('increase-classes');
+        const decreaseDays = document.getElementById('decrease-days');
+        const increaseDays = document.getElementById('increase-days');
+        const decreaseBlogs = document.getElementById('decrease-blogs');
+        const increaseBlogs = document.getElementById('increase-blogs');
+        const maxDaysText = document.getElementById('max-days');
+        const basePayText = document.getElementById('base-pay');
+        const volumeBonusText = document.getElementById('volume-bonus');
+        const fullDayBonusText = document.getElementById('full-day-bonus');
+        const blogPayText = document.getElementById('blog-pay');
+        const totalPayText = document.getElementById('total-pay');
+        const bonusRateText = document.getElementById('bonus-rate');
+        const effectiveRateText = document.getElementById('effective-rate');
+        
+        // Get volume bonus based on number of classes
+        function getVolumeBonus(classCount) {
+            if (classCount >= 9) return 75;
+            if (classCount >= 7) return 50;
+            if (classCount >= 5) return 25;
+            if (classCount >= 2) return 10;
+            return 0;
+        }
+        
+        // Format as USD
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { 
+                style: 'currency', 
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+        
+        // Update calculations and display
+        function updateCalculations() {
+            const classes = parseInt(classesInput.value) || 0;
+            const fullDays = parseInt(fullDaysInput.value) || 0;
+            const blogs = parseInt(blogsInput.value) || 0;
+            
+            // Update max days text
+            const maxDays = Math.floor(classes / 2);
+            maxDaysText.textContent = `Maximum allowed: ${maxDays}`;
+            
+            // Ensure full days doesn't exceed maximum
+            if (fullDays > maxDays) {
+                fullDaysInput.value = maxDays;
+                updateCalculations();
+                return;
+            }
+            
+            // Calculate amounts
+            const volumeBonus = getVolumeBonus(classes);
+            const totalVolumeBonus = volumeBonus * classes;
+            const totalFullDayBonus = FULL_DAY_BONUS * fullDays;
+            const baseTotal = BASE_PAY * classes;
+            const totalBlogPay = BLOG_PAY * blogs;
+            const grandTotal = baseTotal + totalVolumeBonus + totalFullDayBonus + totalBlogPay;
+            const effectiveRate = classes > 0 ? grandTotal / classes : 0;
+            
+            // Update text elements
+            basePayText.textContent = `${formatCurrency(BASE_PAY)} × ${classes} = ${formatCurrency(baseTotal)}`;
+            volumeBonusText.textContent = `${formatCurrency(volumeBonus)} × ${classes} = ${formatCurrency(totalVolumeBonus)}`;
+            fullDayBonusText.textContent = `${formatCurrency(FULL_DAY_BONUS)} × ${fullDays} = ${formatCurrency(totalFullDayBonus)}`;
+            blogPayText.textContent = `${formatCurrency(BLOG_PAY)} × ${blogs} = ${formatCurrency(totalBlogPay)}`;
+            totalPayText.textContent = formatCurrency(grandTotal);
+            bonusRateText.textContent = `Volume Bonus: ${formatCurrency(volumeBonus)} per class`;
+            effectiveRateText.textContent = `Effective Rate: ${formatCurrency(effectiveRate)} per class`;
+            
+            // Update button states
+            decreaseClasses.disabled = classes <= 0;
+            decreaseDays.disabled = fullDays <= 0;
+            decreaseBlogs.disabled = blogs <= 0;
+        }
+        
+        // Event listeners for buttons
+        decreaseClasses.addEventListener('click', () => {
+            if (parseInt(classesInput.value) > 0) {
+                classesInput.value = parseInt(classesInput.value) - 1;
+                updateCalculations();
+            }
+        });
+        
+        increaseClasses.addEventListener('click', () => {
+            classesInput.value = parseInt(classesInput.value) + 1;
+            updateCalculations();
+        });
+        
+        decreaseDays.addEventListener('click', () => {
+            if (parseInt(fullDaysInput.value) > 0) {
+                fullDaysInput.value = parseInt(fullDaysInput.value) - 1;
+                updateCalculations();
+            }
+        });
+        
+        increaseDays.addEventListener('click', () => {
+            const currentValue = parseInt(fullDaysInput.value) || 0;
+            const maxDays = Math.floor(parseInt(classesInput.value) / 2);
+            if (currentValue < maxDays) {
+                fullDaysInput.value = currentValue + 1;
+                updateCalculations();
+            }
+        });
+        
+        decreaseBlogs.addEventListener('click', () => {
+            if (parseInt(blogsInput.value) > 0) {
+                blogsInput.value = parseInt(blogsInput.value) - 1;
+                updateCalculations();
+            }
+        });
+        
+        increaseBlogs.addEventListener('click', () => {
+            blogsInput.value = (parseInt(blogsInput.value) || 0) + 1;
+            updateCalculations();
+        });
+        
+        // Event listeners for input changes
+        classesInput.addEventListener('change', updateCalculations);
+        fullDaysInput.addEventListener('change', updateCalculations);
+        blogsInput.addEventListener('change', updateCalculations);
+        
+        // Initialize calculations
+        updateCalculations();
+    </script>
+</body>
+</html>
